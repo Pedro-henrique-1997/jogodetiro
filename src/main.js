@@ -5,6 +5,21 @@ kaboom({
 
 })
 
+const inimigos = [
+	"apple",
+	"lightening",
+	"coin",
+	"egg",
+	"key",
+	"door",
+	"meat",
+	"mushroom",
+]
+
+for(const enemy of inimigos){
+	loadSprite(enemy, `/sprites/${enemy}.png`)
+}
+
 loadSprite("bean", "/sprites/bean.png")
 
 const velocidade = 400
@@ -48,7 +63,25 @@ function atirar(posicao){
 	])
 }
 
-oKeyPress("s", () => {
+onKeyPress("s", () => {
 	atirar(player.pos.add(16,0))
 })
 
+var inimigo_velocidade = 200
+
+function geradorDeInimigos(){
+	const gerarInimigos = choose(inimigos)
+	add([
+		sprite(gerarInimigos),
+		pos(width(), rand(50, height() - 50)),
+		anchor("center"),
+		area(),
+		move(LEFT, inimigo_velocidade),
+		offscreen({destroy: true}),
+		"inimigos",
+	])
+}
+
+loop(1.5, () => {
+	geradorDeInimigos()
+})
