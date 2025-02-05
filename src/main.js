@@ -85,3 +85,25 @@ function geradorDeInimigos(){
 loop(1.5, () => {
 	geradorDeInimigos()
 })
+
+const jogador_energia = 1000
+
+const vidaLabel = add([
+	text("energia"),
+	pos(25,24),
+])
+
+const barra_de_vida = add([
+	rect(width(), 24),
+	pos(0,0),
+	color(107, 201, 108),
+	fixed(),
+	{
+		max: jogador_energia,
+		set(hp){
+			this.width = width() * hp / this.max
+			this.flash = true
+		}
+	}
+])
+
