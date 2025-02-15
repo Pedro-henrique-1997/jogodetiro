@@ -5,6 +5,8 @@ kaboom({
 
 })
 
+scene("jogo", () => {
+	
 const inimigos = [
 	"apple",
 	"lightening",
@@ -24,11 +26,14 @@ loadSprite("bean", "/sprites/bean.png")
 
 const velocidade = 400
 
+var jogador_energia = 1000
+
 const player = add([
 	sprite("bean"),
 	pos(100, 125),
 	area(),
 	anchor("center"),
+	health(jogador_energia)
 ])
 
 player.onKeyDown("right", () => {
@@ -67,7 +72,8 @@ onKeyPress("s", () => {
 	atirar(player.pos.add(16,0))
 })
 
-var inimigo_velocidade = 200
+var inimigo_velocidade = 300
+var energia_inimigo = 80
 
 function geradorDeInimigos(){
 	const gerarInimigos = choose(inimigos)
@@ -76,6 +82,7 @@ function geradorDeInimigos(){
 		pos(width(), rand(50, height() - 50)),
 		anchor("center"),
 		area(),
+		health(energia_inimigo),
 		move(LEFT, inimigo_velocidade),
 		offscreen({destroy: true}),
 		"inimigos",
@@ -86,12 +93,6 @@ loop(1.5, () => {
 	geradorDeInimigos()
 })
 
-const jogador_energia = 1000
-
-const vidaLabel = add([
-	text("energia"),
-	pos(25,24),
-])
 
 const barra_de_vida = add([
 	rect(width(), 24),
@@ -107,3 +108,49 @@ const barra_de_vida = add([
 	}
 ])
 
+
+onCollide("bala", "inimigos", (b, e) => {
+	destroy(b)
+	e.hurt(10)
+	shake(1)
+})
+
+on("death", "inimigos", (e) => {
+	shake(2),
+	destroy(e),
+	addKaboom(e.pos)
+})
+
+
+player.onHurt(() => {
+	barra_de_vida.set(player.hp())
+})
+
+var vidaLabel = add([
+	text(jogador_energia),
+	pos(25,24),
+])
+
+player.onCollide("inimigos", (e) => {
+	player.hurt(100)
+	jogador_energia -= 100
+	vidaLabel.text = jogador_energia
+	destroy(e)
+	addKaboom(e.pos)
+	if(jogador_energia == 0){
+		go("morte")
+	}
+})
+
+
+})
+
+scene("morte", () => {
+	add([
+		text("VOCE PERDEU"),
+		pos(24,25),
+		color(0,0,0)
+	])
+})
+
+go("jogo")
