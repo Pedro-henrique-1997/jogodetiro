@@ -23,6 +23,7 @@ for(const enemy of inimigos){
 }
 
 loadSprite("bean", "/sprites/bean.png")
+loadSprite("coracao", "/sprites/heart.png")
 
 const velocidade = 400
 
@@ -72,7 +73,7 @@ onKeyPress("s", () => {
 	atirar(player.pos.add(16,0))
 })
 
-var inimigo_velocidade = 300
+var inimigo_velocidade = 500
 var energia_inimigo = 80
 
 function geradorDeInimigos(){
@@ -89,10 +90,25 @@ function geradorDeInimigos(){
 	])
 }
 
-loop(1.5, () => {
+function gerarCoracoes(){
+	add([
+		sprite("coracao"),
+		pos(width(), rand(50, height() - 50)),
+		anchor("center"),
+		area(),
+		move(LEFT, inimigo_velocidade),
+		offscreen({destroy: true}),
+		"coracao",
+	])
+}
+
+loop(1, () => {
 	geradorDeInimigos()
 })
 
+loop(4.0, () => {
+    gerarCoracoes()
+})
 
 const barra_de_vida = add([
 	rect(width(), 24),
@@ -111,7 +127,7 @@ const barra_de_vida = add([
 
 onCollide("bala", "inimigos", (b, e) => {
 	destroy(b)
-	e.hurt(10)
+	e.hurt(30)
 	shake(1)
 })
 
@@ -126,15 +142,9 @@ player.onHurt(() => {
 	barra_de_vida.set(player.hp())
 })
 
-var vidaLabel = add([
-	text(jogador_energia),
-	pos(25,24),
-])
 
 player.onCollide("inimigos", (e) => {
 	player.hurt(100)
-	jogador_energia -= 100
-	vidaLabel.text = jogador_energia
 	destroy(e)
 	addKaboom(e.pos)
 	if(jogador_energia == 0){
@@ -142,6 +152,15 @@ player.onCollide("inimigos", (e) => {
 	}
 })
 
+player.onCollide("coracao", (e) => {
+	destroy(e)
+	player.heal(50)
+	
+})
+
+player.onHeal(() => {
+	barra_de_vida.set(player.hp())
+})
 
 })
 
