@@ -24,6 +24,8 @@ for(const enemy of inimigos){
 
 loadSprite("bean", "/sprites/bean.png")
 loadSprite("coracao", "/sprites/heart.png")
+loadSprite("raio", "/sprites/raio.png")
+loadSprite("pizza", "/sprites/pizza.png")
 
 const velocidade = 400
 
@@ -73,8 +75,31 @@ onKeyPress("s", () => {
 	atirar(player.pos.add(16,0))
 })
 
+function raioLaser(posicao){
+	var raio_laser = add([
+		sprite("raio"),
+		pos(posicao),
+		rotate(90, 100),
+		anchor("center"),
+		area(),
+		move(RIGHT, inimigo_velocidade),
+		"raio",
+	])
+}
+
+loop(5, () => {
+	var pizza = add([
+		sprite("pizza"),
+		area(),
+		pos(width(), rand(50, height() - 50)),
+		anchor("center"),
+		move(LEFT, inimigo_velocidade),
+		"pizza",
+	])
+})
+
 var inimigo_velocidade = 500
-var energia_inimigo = 80
+var energia_inimigo = 100
 
 function geradorDeInimigos(){
 	const gerarInimigos = choose(inimigos)
@@ -118,12 +143,11 @@ const barra_de_vida = add([
 	{
 		max: jogador_energia,
 		set(hp){
-			this.width = width() * hp / this.max
 			this.flash = true
+			this.width = width() * hp / this.max
 		}
 	}
 ])
-
 
 onCollide("bala", "inimigos", (b, e) => {
 	destroy(b)
@@ -137,6 +161,12 @@ on("death", "inimigos", (e) => {
 	addKaboom(e.pos)
 })
 
+onCollide("raio", "inimigos", (r, e) => {
+	destroy(r)
+	destroy(e)
+	addKaboom(e.pos)
+})
+
 
 player.onHurt(() => {
 	barra_de_vida.set(player.hp())
@@ -147,15 +177,22 @@ player.onCollide("inimigos", (e) => {
 	player.hurt(100)
 	destroy(e)
 	addKaboom(e.pos)
+	jogador_energia -= 100
 	if(jogador_energia == 0){
 		go("morte")
 	}
 })
 
+player.onCollide("pizza", (e) => {
+	destroy(e)
+	onKeyPress("a", () => {
+	raioLaser(player.pos.add(16,0))
+	})
+})
+
 player.onCollide("coracao", (e) => {
 	destroy(e)
 	player.heal(50)
-	
 })
 
 player.onHeal(() => {
