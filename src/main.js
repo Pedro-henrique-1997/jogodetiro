@@ -87,17 +87,9 @@ function raioLaser(posicao){
 	])
 }
 
-loop(5, () => {
-	var pizza = add([
-		sprite("pizza"),
-		area(),
-		pos(width(), rand(50, height() - 50)),
-		anchor("center"),
-		move(LEFT, inimigo_velocidade),
-		"pizza",
-	])
-})
+var pizzaVelocidade = 700
 
+var cargaDeRaios = false
 var inimigo_velocidade = 500
 var energia_inimigo = 100
 
@@ -133,6 +125,17 @@ loop(1, () => {
 
 loop(4.0, () => {
     gerarCoracoes()
+})
+
+loop(5, () => {
+	var pizza = add([
+		sprite("pizza"),
+		area(),
+		pos(width(), rand(50, height() - 50)),
+		anchor("center"),
+		move(LEFT, pizzaVelocidade),
+		"pizza",
+	])
 })
 
 const barra_de_vida = add([
@@ -185,10 +188,19 @@ player.onCollide("inimigos", (e) => {
 
 player.onCollide("pizza", (e) => {
 	destroy(e)
-	onKeyPress("a", () => {
-	raioLaser(player.pos.add(16,0))
-	})
+	cargaDeRaios = true
+	
 })
+
+wait(10, () => {
+	cargaDeRaios = false
+})
+
+onKeyPress("a", () => {
+	if(cargaDeRaios){
+		raioLaser(player.pos.add(16,0))
+	}
+	})
 
 player.onCollide("coracao", (e) => {
 	destroy(e)
